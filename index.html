@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timeline</title>
+    <link title="timeline-styles" rel="stylesheet" href="https://cdn.knightlab.com/libs/timeline3/latest/css/timeline.css">
+    <script src="https://cdn.knightlab.com/libs/timeline3/latest/js/timeline.js"></script>
+</head>
+<body>
+    <div id="timeline-embed" style="width: 100%; height: 600px;"></div>
+    <script>
+        var timeline_json = {
+            "title": {
+                "text": {"headline": "机动战士高达SEED DESTINY"}
+            },
+            "events": [
+                {
+                    "start_date": {"year": 2005, "month": 7, "day": 23},
+                    "text": {
+                        "headline": "黄金的意志",
+                        "text": "第40集"
+                    },
+                    "media": {
+                        "url": "./assets/images/destiny_story40.jpg",
+                        "caption": "第40集"
+                        }
+                },
+        {
+            "start_date": {"year": 2005, "month": 8, "day": 6},
+            "text": {"headline": "自由与正义", "text": "第42集"},
+            "media": {"url": "./assets/images/destiny_story41.jpg", "caption": "第42集"}
+        },
+        {
+            "start_date": {"year": 2005, "month": 8, "day": 13},
+            "text": {"headline": "反击之声", "text": "第43集"},
+            "media": {"url": "./assets/images/destiny_story42.jpg", "caption": "第43集"}
+        },
+        {
+            "start_date": {"year": 2005, "month": 8, "day": 20},
+            "text": {"headline": "两个拉克丝", "text": "第44集"},
+            "media": {"url": "./assets/images/destiny_story43.jpg", "caption": "第44集"}
+        },
+        {
+            "start_date": {"year": 2005, "month": 8, "day": 27},
+            "text": {"headline": "变革的序曲", "text": "第45集"},
+            "media": {"url": "./assets/images/destiny_story44.jpg", "caption": "第45集"}
+        },
+        {
+            "start_date": {"year": 2005, "month": 9, "day": 3},
+            "text": {"headline": "真实之歌", "text": "第46集"},
+            "media": {"url": "./assets/images/destiny_story45.jpg", "caption": "第46集"}
+        },
+        {
+            "start_date": {"year": 2005, "month": 9, "day": 10},
+            "text": {"headline": "米娅", "text": "第47集"},
+            "media": {"url": "./assets/images/destiny_story46.jpg", "caption": "第47集"}
+        },
+        {
+            "start_date": {"year": 2005, "month": 9, "day": 17},
+            "text": {"headline": "新的世界", "text": "第48集"},
+            "media": {"url": "./assets/images/destiny_story47.jpg", "caption": "第48集"}
+        },
+        {
+            "start_date": {"year": 2005, "month": 9, "day": 24},
+            "text": {"headline": "雷", "text": "第49集"},
+            "media": {"url": "./assets/images/destiny_story48.jpg", "caption": "第49集"}
+        },
+        {
+            "start_date": {"year": 2005, "month": 10, "day": 1},
+            "text": {"headline": "最后的力量", "text": "FINAL PHASE"},
+            "media": {"url": "./assets/images/destiny_story49.jpg", "caption": "FINAL PHASE"}
+        },
+        {
+            "start_date": {"year": 2005, "month": 12, "day": 25},
+            "text": {"headline": "被选择的未来", "text": "FINAL PLUS"},
+            "media": {"url": "./assets/images/destiny_story50.jpg", "caption": "FINAL PLUS"}
+        },
+        {
+            "start_date": {"year": 2005, "month": 8, "day": 21},
+            "text": {
+                "headline": "HG 1/144 无限正义",
+                "text": "2005年08月21日发售<br>1,760円（税入）"
+            },
+            "media": {
+                "url": "./assets/images/HG-infinity_justice.jpg",
+                "caption": "HG 1/144 无限正义"
+                }
+        },
+        {
+            "start_date": {"year": 2005, "month": 9, "day": 30},
+            "text": {
+                "headline": "HG 1/144 强袭自由",
+                "text": "2005年09月30日发售<br>1,760円（税入）"
+            },
+            "media": {
+                "url": "./assets/images/HG-strike_freedom.jpg",
+                "caption": "HG 1/144 强袭自由"
+            }
+        },
+        {
+        "start_date": {"year": 2005, "month": 8, "day": 12},
+        "text": {
+            "headline": "HG 老虎烈焰（量产机）",
+            "text": "2005年08月12日发售<br>1,650円（税入）"
+        },
+        "media": {
+            "url": "./assets/images/HG-gouf_ignited.jpg",
+            "caption": "HG 老虎烈焰（量产机）"
+        }
+    },
+    {
+        "start_date": {"year": 2005, "month": 8, "day": 6},
+        "text": {
+            "headline": "1/100 强袭自由",
+            "text": "2005年08月06日发售<br>2,860円（税入）"
+        },
+        "media": {
+            "url": "./assets/images/1-100-strike_freedom.jpg",
+            "caption": "1/100 强袭自由"
+        }
+    },
+    {
+        "start_date": {"year": 2005, "month": 8, "day": 27},
+        "text": {
+            "headline": "PG 1/60 嫣红强袭+攻击者背包",
+            "text": "2005年08月27日发售<br>20,900円（税入）"
+        },
+        "media": {
+            "url": "./assets/images/PG-1-60-strike_rouge+pack.jpg",
+            "caption": "PG 1/60 嫣红强袭+攻击者背包"
+        }
+    },
+    {
+        "start_date": {"year": 2005, "month": 9},
+        "text": {
+            "headline": "MG 1/100 自由 Extra Finish",
+            "text": "2005年09月发售<br>8,800円（税入）"
+        },
+        "media": {
+            "url": "./assets/images/MG-1-100_freedom_extra_finish.jpg",
+            "caption": "MG 1/100 自由 Extra Finish"
+        }
+    },
+    {
+        "start_date": {"year": 2005, "month": 11, "day": 23},
+        "text": {
+            "headline": "HG 1/144 命运",
+            "text": "2005年11月23日发售<br>1,760円（税入）"
+        },
+        "media": {
+            "url": "./assets/images/HG-1-144_destiny.jpg",
+            "caption": "HG 1/144 命运"
+        }
+    }
+            ]
+        }
+
+        var additionalOptions = {
+            // settings
+        }
+
+        timeline = new TL.Timeline('timeline-embed', timeline_json, additionalOptions);
+    </script>
+</body>
+</html>
+``
