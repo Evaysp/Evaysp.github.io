@@ -1,25 +1,561 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Timeline</title>
+    <title>TERMINAL: GUNDAM SEED DESTINY ARCHIVES</title>
+    
+    <!-- TimelineJS CSS -->
     <link title="timeline-styles" rel="stylesheet" href="https://cdn.knightlab.com/libs/timeline3/latest/css/timeline.css">
+    
+    <style>
+        :root {
+            --term-green: #39ff14;
+            --term-orange: #ffae00;
+            --term-red: #ff0000;
+            --term-blue: #00ccff;
+            --term-pink: #ff69b4;
+            --bg-black: #0a0a0a;
+            --scanline: rgba(0, 255, 0, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-black);
+            color: var(--term-green);
+            font-family: "Courier New", Courier, monospace;
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* CRT 扫描线效果 */
+        body::after {
+            content: " ";
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 1000;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+
+        header {
+            border-bottom: 2px solid var(--term-orange);
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #000;
+            z-index: 10;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--term-orange);
+            text-shadow: 0 0 10px var(--term-orange);
+            letter-spacing: 2px;
+        }
+
+        .system-status {
+            font-size: 0.8rem;
+            color: var(--term-red);
+            animation: blink 1s infinite;
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            padding: 20px;
+            flex-wrap: wrap;
+            border-bottom: 1px solid #333;
+        }
+
+        .char-btn {
+            background: transparent;
+            border: 1px solid var(--term-green);
+            color: var(--term-green);
+            padding: 10px 30px;
+            font-family: inherit;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%);
+        }
+
+        .char-btn:hover, .char-btn.active {
+            background: var(--term-green);
+            color: black;
+            box-shadow: 0 0 15px var(--term-green);
+        }
+
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            width: 100%;
+        }
+
+        /* Character Grid Section */
+        .character-section {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 40px;
+            margin-bottom: 60px;
+            min-height: 500px; /* 防止内容加载时跳动 */
+        }
+
+        .visual-display {
+            border: 1px solid var(--term-green);
+            padding: 10px;
+            position: relative;
+            height: fit-content;
+            background: rgba(0, 20, 0, 0.3);
+        }
+
+        .visual-display img {
+            width: 100%;
+            height: auto;
+            display: block;
+            /* 复古终端图片滤镜 */
+            filter: sepia(50%) hue-rotate(50deg) saturate(150%) contrast(1.1) brightness(0.8);
+            transition: filter 0.5s;
+            border: 1px solid rgba(57, 255, 20, 0.3);
+        }
+
+        .visual-display img:hover {
+            filter: none;
+        }
+
+        .visual-display::before {
+            content: "VISUAL_DATA_ONLY // ID_RECOGNIZED";
+            position: absolute;
+            top: -10px; left: 10px;
+            background: var(--bg-black);
+            padding: 0 5px;
+            font-size: 0.8rem;
+            color: var(--term-green);
+        }
+
+        .data-display {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .data-header {
+            border-bottom: 1px dashed var(--term-green);
+            padding-bottom: 10px;
+        }
+
+        .data-header h1 {
+            font-size: 3rem;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .data-header h2 {
+            font-size: 1rem;
+            background: var(--term-orange);
+            color: black;
+            display: inline-block;
+            padding: 2px 10px;
+            font-weight: bold;
+        }
+
+        .timeline-container-cards {
+            margin-top: 20px;
+        }
+
+        .timeline-card {
+            border-left: 3px solid var(--term-orange);
+            margin-bottom: 20px;
+            padding-left: 20px;
+            position: relative;
+            opacity: 0;
+            animation: fadeIn 0.5s forwards;
+            background: linear-gradient(90deg, rgba(255,255,255,0.05) 0%, transparent 100%);
+            padding-top: 10px;
+            padding-bottom: 10px;
+        }
+
+        .timeline-card::before {
+            content: "►";
+            position: absolute;
+            left: -10px;
+            top: 10px;
+            color: var(--bg-black);
+            text-shadow: -1px 0 var(--term-orange);
+            font-size: 0.8rem;
+        }
+
+        .stage-title {
+            color: var(--term-orange);
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .stage-desc {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #ccc;
+        }
+
+        /* GLOBAL TIMELINE SECTION (TimelineJS) */
+        .history-section {
+            border-top: 2px solid var(--term-orange);
+            padding-top: 20px;
+            position: relative;
+            margin-top: 40px;
+        }
+        
+        .history-header {
+            margin-bottom: 20px;
+            color: var(--term-orange);
+            text-transform: uppercase;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .history-header::before {
+            content: "";
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            background: var(--term-orange);
+            animation: blink 2s infinite;
+        }
+
+        /* --- TimelineJS 样式强制覆盖 (Dark/Terminal Mode) --- */
+        /* 覆盖背景和字体 */
+        .tl-timeline {
+            font-family: "Courier New", Courier, monospace !important;
+            background-color: transparent !important;
+        }
+        
+        /* 内容容器背景 */
+        .tl-text-content-container {
+            background-color: rgba(0, 20, 0, 0.9) !important;
+            border: 1px solid var(--term-green) !important;
+            box-shadow: 0 0 10px rgba(0,255,0,0.1);
+        }
+
+        /* 标题颜色 */
+        .tl-headline-date, .tl-headline {
+            color: var(--term-orange) !important;
+            font-family: inherit !important;
+            text-transform: uppercase;
+        }
+
+        /* 正文颜色 */
+        .tl-text {
+            color: var(--term-green) !important;
+        }
+
+        .tl-text p {
+            font-family: inherit !important;
+        }
+
+        .tl-caption {
+            color: #aaa !important;
+        }
+
+        /* 底部时间导航条背景 */
+        .tl-timenav {
+            background-color: rgba(0,0,0,0.8) !important;
+            border-top: 1px solid var(--term-green) !important;
+        }
+
+        /* 时间刻度文字 */
+        .tl-timeaxis-tick-text {
+            color: var(--term-green) !important;
+        }
+
+        /* 时间标记块 */
+        .tl-timemarker-content-container {
+            background-color: var(--bg-black) !important;
+            border: 1px solid var(--term-green) !important;
+        }
+
+        .tl-timemarker-content-container:hover {
+            background-color: var(--term-green) !important;
+            border-color: var(--term-orange) !important;
+        }
+        
+        .tl-timemarker-content-container:hover .tl-headline {
+            color: black !important;
+        }
+
+        /* 加载状态 */
+        .loading-text {
+            color: var(--term-orange);
+            text-align: center;
+            padding: 50px;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .character-section {
+                grid-template-columns: 1fr;
+            }
+            main { padding: 10px; }
+            .char-btn { padding: 10px 15px; font-size: 1rem; }
+        }
+    </style>
+    
+    <!-- TimelineJS Script -->
     <script src="https://cdn.knightlab.com/libs/timeline3/latest/js/timeline.js"></script>
 </head>
 <body>
-    <div id="timeline-embed" style="width: 100%; height: 600px;"></div>
-    <script>
-        fetch('./assets/data/sd_timeline_data.json')
-            .then(response => response.json())
-            .then(timeline_json => {
-                var additionalOptions = {
-                    // settings
-                }
 
-                timeline = new TL.Timeline('timeline-embed', timeline_json, additionalOptions);
-            })
-            .catch(error => console.error('Error fetching timeline data:', error));
+    <header>
+        <div class="logo">C.E.73 // DATABASE</div>
+        <div class="system-status">MAGI SYSTEM: ARCHIVE_MODE</div>
+    </header>
+
+    <nav id="charNav">
+        <!-- 按钮由 JS 生成 -->
+    </nav>
+
+    <main>
+        <!-- 角色档案区域 -->
+        <section id="characterContent" class="character-section">
+            <!-- 内容由 JS 注入 -->
+        </section>
+
+        <!-- 历史年表区域 -->
+        <section class="history-section">
+            <div class="history-header">Chronological Data // C.E.73 - 74</div>
+            <div id="timeline-embed" style="width: 100%; height: 650px;">
+                <div class="loading-text">ACCESSING DATABASE...</div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // --- 1. 角色数据 (SEED DESTINY) ---
+        // 注意：人物图片使用了网络图作为演示，你可以替换为本地 ./assets/images/...
+        const characters = {
+            shinn: {
+                name: "Shinn Asuka",
+                title: "ZAFT RED / IMPULSE & DESTINY PILOT",
+                image: "https://static.wikia.nocookie.net/gundam/images/3/36/Shinn_Asuka_DESTINY.jpg", 
+                color: "#ff0000", 
+                growth: [
+                    {
+                        stage: "PHASE-01: 受害者",
+                        text: "奥布流民。在奥布战役中因流弹失去了父母和妹妹。带着对力量的渴望和对战争的愤怒加入了ZAFT，发誓要获得力量保护他人。"
+                    },
+                    {
+                        stage: "PHASE-20: 王牌机师",
+                        text: "驾驶脉冲高达（Impulse）。展现出卓越的战斗本能，但难以服从命令。与史黛拉相遇，这段悲剧的羁绊进一步动摇了他的精神状态。"
+                    },
+                    {
+                        stage: "PHASE-34: 噩梦",
+                        text: "在计算与狂怒中击坠了自由高达。被迪兰达尔议长授予命运高达（Destiny）。完全被议长操控，坚信自己是为了终结所有战争而战。"
+                    },
+                    {
+                        stage: "FINAL PHASE: 折翼",
+                        text: "在月球表面与阿斯兰对决。盲目的愤怒与迷茫导致他最终败于无限正义高达。战后在与基拉的握手中终于找到了内心的平静。"
+                    }
+                ]
+            },
+            kira: {
+                name: "Kira Yamato",
+                title: "ORB / FREEDOM PILOT",
+                image: "https://static.wikia.nocookie.net/gundam/images/2/26/Kira_Yamato_SEED_Destiny_Profile.png",
+                color: "#00ccff", 
+                growth: [
+                    {
+                        stage: "PHASE-01: 隐居",
+                        text: "与拉克丝和孤儿们隐居在奥布海边，试图远离纷争。但针对拉克丝的暗杀行动迫使他再次踏上战场。"
+                    },
+                    {
+                        stage: "PHASE-13: 介入",
+                        text: "驾驶自由高达介入战场，试图以“不杀”的方式解除双方武装。被ZAFT和地球联合军双方视为扰乱战场的混乱因素。"
+                    },
+                    {
+                        stage: "PHASE-39: 天空",
+                        text: "自由高达被毁后，从拉克丝处接收了强袭自由高达（Strike Freedom）。重返宇宙，为了阻止迪兰达尔的“命运计划”而战。"
+                    },
+                    {
+                        stage: "FINAL PHASE: 弥赛亚",
+                        text: "击败雷·扎·巴雷尔并与迪兰达尔对峙。否定了被强制决定的命运，主张人类必须自己选择未来，哪怕那伴随着痛苦。"
+                    }
+                ]
+            },
+            athrun: {
+                name: "Athrun Zala",
+                title: "FAITH / SAVIOUR & JUSTICE PILOT",
+                image: "https://static.wikia.nocookie.net/gundam/images/6/6d/Athrun_Zala_Destiny_Profile.jpg",
+                color: "#800000", 
+                growth: [
+                    {
+                        stage: "PHASE-01: 阿历克斯·迪诺",
+                        text: "作为卡嘉莉的保镖隐姓埋名。对奥布的走向感到迷茫。为了从内部改变局势，选择重回ZAFT。"
+                    },
+                    {
+                        stage: "PHASE-25: 动摇",
+                        text: "驾驶救世主高达（Saviour）。试图指导真·飞鸟但未能建立连接。开始怀疑迪兰达尔的真实动机，最终被当作叛徒追杀。"
+                    },
+                    {
+                        stage: "PHASE-42: 正义",
+                        text: "驾驶老虎烈焰型带着美玲逃亡。重伤后被大天使号救起。接收无限正义高达（Infinite Justice），决心不再迷茫。"
+                    },
+                    {
+                        stage: "FINAL PHASE: 决意",
+                        text: "与曾经的战友真·飞鸟决战。与前次大战不同，这次他带着清晰的信念战斗，击破命运高达并协助终结了战争。"
+                    }
+                ]
+            },
+            lacus: {
+                name: "Lacus Clyne",
+                title: "TERMINAL / ETERNAL CAPTAIN",
+                image: "https://static.wikia.nocookie.net/gundam/images/d/d6/Lacus_Clyne_SEED_Destiny_Profile.jpg",
+                color: "#ff69b4", 
+                growth: [
+                    {
+                        stage: "PHASE-05: 目标",
+                        text: "遭到ZAFT特殊部队暗杀。幸得基拉保护。目睹假冒者（米娅·坎贝尔）被用来操纵民意。"
+                    },
+                    {
+                        stage: "PHASE-30: 真实",
+                        text: "回到宇宙并登上永恒号。收集关于“命运计划”的情报，并为基拉和阿斯兰准备了新型高达。"
+                    },
+                    {
+                        stage: "FINAL PHASE: 声音",
+                        text: "率领克莱因派/终端机势力参与最终决战。与米娅对峙。战后作为调停者，致力于自然人与调整者之间的和平。"
+                    }
+                ]
+            }
+        };
+
+        // --- 2. 初始化程序 ---
+        const nav = document.getElementById('charNav');
+        const main = document.getElementById('characterContent');
+
+        function init() {
+            // 初始化角色导航按钮
+            Object.keys(characters).forEach((key, index) => {
+                const btn = document.createElement('button');
+                // 获取名字的第一部分 (Shinn, Kira...)
+                btn.innerText = characters[key].name.split(' ')[0]; 
+                btn.classList.add('char-btn');
+                btn.onclick = () => loadCharacter(key);
+                nav.appendChild(btn);
+                
+                // 默认加载第一个角色
+                if(index === 0) loadCharacter(key);
+            });
+
+            // 初始化 Timeline (Fetch JSON)
+            initTimeline();
+        }
+
+        function loadCharacter(key) {
+            // 更新按钮状态
+            document.querySelectorAll('.char-btn').forEach(b => b.classList.remove('active'));
+            const buttons = document.querySelectorAll('.char-btn');
+            const index = Object.keys(characters).indexOf(key);
+            if(buttons[index]) buttons[index].classList.add('active');
+
+            const data = characters[key];
+
+            // 生成成长历程卡片
+            let timelineHTML = '';
+            data.growth.forEach((item, i) => {
+                timelineHTML += `
+                    <div class="timeline-card" style="animation-delay: ${i * 0.2}s; border-left-color: ${data.color}">
+                        <div class="stage-title" style="color: ${data.color}">${item.stage}</div>
+                        <div class="stage-desc">${item.text}</div>
+                    </div>
+                `;
+            });
+
+            // 生成主要内容 HTML
+            const html = `
+                <div class="visual-display">
+                    <img src="${data.image}" alt="${data.name}" style="border-color: ${data.color}">
+                </div>
+                <div class="data-display">
+                    <div class="data-header">
+                        <h1 style="color: ${data.color}; text-shadow: 0 0 15px ${data.color}">${data.name}</h1>
+                        <h2 style="background: ${data.color}">${data.title}</h2>
+                    </div>
+                    <div class="timeline-container-cards">
+                        ${timelineHTML}
+                    </div>
+                </div>
+            `;
+
+            main.innerHTML = html;
+        }
+
+        function initTimeline() {
+            // Fetch JSON 数据
+            fetch('./assets/data/sd_timeline_data.json')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(timeline_json => {
+                    console.log("Timeline Data Loaded:", timeline_json);
+                    
+                    var additionalOptions = {
+                        initial_zoom: 2,
+                        font: null, // 禁用默认字体加载，使用我们的 CSS 字体
+                        language: 'zh-cn',
+                        timenav_height_percentage: 25
+                    }
+                    
+                    // 清除加载文字
+                    document.getElementById('timeline-embed').innerHTML = "";
+                    
+                    // 实例化 Timeline
+                    window.timeline = new TL.Timeline('timeline-embed', timeline_json, additionalOptions);
+                })
+                .catch(error => {
+                    console.error('Error fetching timeline data:', error);
+                    document.getElementById('timeline-embed').innerHTML = `
+                        <div style="color:red; padding:20px; border:1px solid red;">
+                            ERROR: CONNECTION FAILED.<br>
+                            Please ensure <strong>./assets/data/sd_timeline_data.json</strong> exists.<br>
+                            And you are running this via a Local Server (http://localhost...) not file://.
+                        </div>
+                    `;
+                });
+        }
+
+        // 启动
+        init();
     </script>
 </body>
 </html>
